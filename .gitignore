@@ -131,3 +131,5 @@ dmypy.json
 # Config
 
 /config
+
+/node_modules
