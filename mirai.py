@@ -1,17 +1,22 @@
 import discord;
 import json;
 
-bot = discord.Bot();
+mirai = discord.Bot();
 
+# Reads config json file
 with open("config/mirai.json") as file:
   config = json.load(file);
   
-@bot.event
+# Event handlers  
+@mirai.event
+# Function that fires when mirai boots up and successfully logs in
 async def on_ready():
-    print(f"We have logged in as {bot.user}")
+    dev_channel = mirai.get_channel(929427727033982986);
+    print(f"We have logged in as {mirai.user}");
+    await dev_channel.send("I'm booting up! (◕ᴗ◕✿)");
 
-@bot.slash_command(guild_ids=[929426428003483720])
-async def hello(ctx):
-    await ctx.respond("Hello!")
+# Loads cogs into mirai
+# TODO: Make it a loop of the whole cogs folder
+mirai.load_extension('cogs.about');
 
-bot.run(config["token"]);
+mirai.run(config["token"]);
