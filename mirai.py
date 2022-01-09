@@ -15,7 +15,7 @@ async def on_ready():
     print(f"We have logged in as {mirai.user}");
     await dev_channel.send("I'm booting up! (◕ᴗ◕✿)");
 
-# Loads cogs into the mirai
+# Loads cogs into mirai
 # TODO: Make it a loop of the whole cogs folder
 mirai.load_extension('cogs.about');
 
