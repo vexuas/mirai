@@ -11,8 +11,8 @@ with open("config/mirai.json") as file:
 @mirai.event
 # Function that fires when mirai boots up and successfully logs in
 async def on_ready():
-    dev_channel = mirai.get_channel(929427727033982986);
-    await dev_channel.send("I'm booting up! (◕ᴗ◕✿)");
+  dev_channel = mirai.get_channel(929427727033982986);
+  await dev_channel.send("I'm booting up! (◕ᴗ◕✿)");
 
 # Loads cogs into mirai
 # TODO: Make it a loop of the whole cogs folder
