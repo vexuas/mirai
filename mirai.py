@@ -8,10 +8,10 @@ with open("config/mirai.json") as file:
   
 @bot.event
 async def on_ready():
-    print(f"We have logged in as {bot.user}")
+    dev_channel = bot.get_channel(929427727033982986);
+    print(f"We have logged in as {bot.user}");
+    await dev_channel.send("I'm booting up! (◕ᴗ◕✿)");
 
-@bot.slash_command(guild_ids=[929426428003483720])
-async def hello(ctx):
-    await ctx.respond("Hello!")
+bot.load_extension('cogs.about');
 
 bot.run(config["token"]);
