@@ -24,3 +24,11 @@ def generate_about_embed(bot):
 
   return embed;
 #----------
+def generate_countdown_information_embed():
+  embed = discord.Embed();
+  embed.title = "Countdown | Help";
+  embed.colour = discord.Colour(10699547);
+  embed.set_thumbnail(url="https://cdn.discordapp.com/attachments/248430185463021569/929419612234321950/mirai.jpg");
+  embed.description = "The Countdown command, as the name suggests, counts down from a specified number of days.\n\nWhen prompted, I will create a separate channel to keep track of the remaining days and will ping you there daily until the end!\n\nTo use this command, simply add your desired days after `/countdown`";
+
+  return embed;

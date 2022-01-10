@@ -9,7 +9,7 @@ class About(commands.Cog):
   @slash_command(guild_ids=[929426428003483720], description="Displays information about Mirai")
   async def about(self, ctx):
     embed = generate_about_embed(self.bot);
-    await ctx.respond(embed=embed);
+    return await ctx.respond(embed=embed);
   
 
 def setup(bot: commands.Bot):
