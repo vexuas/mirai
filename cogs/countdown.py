@@ -1,6 +1,7 @@
+import discord;
 from discord.commands import slash_command, Option;
 from discord.ext import commands
-
+from discord.ui import Button, View;
 from helpers import generate_countdown_information_embed;
 
 class Countdown(commands.Cog):
@@ -13,7 +14,13 @@ class Countdown(commands.Cog):
       embed = generate_countdown_information_embed();
       return await ctx.respond(embed=embed);
 
-    return await ctx.respond(f'Coundown with {days} days!');
+    confirm_button = Button(label="Let's go!", style=discord.ButtonStyle.success);
+    cancel_button = Button(label="Cancel", style=discord.ButtonStyle.secondary);
+    actions_view = View();
+    actions_view.add_item(cancel_button);
+    actions_view.add_item(confirm_button);
+
+    return await ctx.respond(f'Coundown with {days} days!', view=actions_view);
       
 
 def setup(bot: commands.Bot):
