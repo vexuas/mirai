@@ -17,5 +17,6 @@ async def on_ready():
 # Loads cogs into mirai
 # TODO: Make it a loop of the whole cogs folder
 mirai.load_extension('cogs.about');
+mirai.load_extension('cogs.countdown');
 
 mirai.run(config["token"]);
