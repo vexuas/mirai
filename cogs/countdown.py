@@ -15,11 +15,18 @@ class Countdown(commands.Cog):
       
   # Generates the embed going to be sent for the default countdown command    
   def generate_countdown_information_embed(self):
-     embed = generate_embed();
-     embed.title = "Countdown | Help";
-     embed.description = "The Countdown command, as the name suggests, counts down from a specified number of days.\n\nWhen prompted, I will create a separate channel to keep track of the remaining days and will ping you there daily until the end!\n\nTo use this command, simply add your desired days after `/countdown`";
+    embed = generate_embed();
+    embed.title = "Countdown | Help";
+    embed.description = "The Countdown command, as the name suggests, counts down from a specified number of days.\n\nWhen prompted, I will create a separate channel to keep track of the remaining days and will ping you there daily until the end!\n\nTo use this command, simply add your desired days after `/countdown`";
 
-     return embed;     
+    return embed;     
+
+  def generate_countdown_confirmation_embed(self, days):
+    embed = generate_embed();
+    embed.title = "Countdown | Confirmation";
+    embed.description = f"You've created a countdown of {days} days.\n\nBy confirming below, I'll create a separate channel where I'll ping you daily on the number of days left\n\nGood luck with your goal! :D"
+
+    return embed;
 
   def generate_buttons(self):
     confirm_button = Button(label="Let's go!", style=discord.ButtonStyle.success);
@@ -30,7 +37,7 @@ class Countdown(commands.Cog):
     view.add_item(confirm_button);
 
     return view;
-
+    
   # Registering slash command
   @slash_command(guild_ids=config["guildIDs"], description="Starts a countdown from a set number of days")
   async def countdown(self, ctx, days: Option(int, "Enter number of days!", required=False)):
@@ -39,8 +46,9 @@ class Countdown(commands.Cog):
       return await ctx.respond(embed=embed);
 
     actions_view = self.generate_buttons();
+    embed = self.generate_countdown_confirmation_embed(days);
 
-    return await ctx.respond(f'Coundown with {days} days!', view=actions_view);
+    return await ctx.respond(embed=embed, view=actions_view);
 
 
 def setup(bot: commands.Bot):
