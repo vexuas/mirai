@@ -48,7 +48,9 @@ class Countdown(commands.Cog):
     cancel_button.callback = self.handle_on_cancel;
     
     return view;
-      
+
+  # Handler when a user clicks the Cancel Button
+  # Edits the original message with a new embed and clears buttons
   async def handle_on_cancel(self, interaction):
     embed = discord.Embed();
     embed.color = discord.Colour(16711680);
@@ -56,19 +58,29 @@ class Countdown(commands.Cog):
 
     return await interaction.response.edit_message(embed=embed, view=None);
 
+  # Handler when a user clicks the Let's go Button
+  # 3 parts:
+  # - Creates a new channel under a new category
+  # - Edits the original interaction message with a success message with a link to the newly created channel
+  # - Finally pings the user on the newly created channel the start of the countdown
+  # I initially wanted to move the user to the text channel but seems discord doesn't support that; only voice channel movement. 
+  # I guess it's hard to keep track and merits probably doesn't outweight the implementation
   async def handle_on_confirm(self, interaction):
+    # Creates a new channel under a new category
     current_guild = await self.bot.fetch_guild(interaction.guild_id);
-    countdown_category = await current_guild.create_category('Countdown');
+    countdown_category = await current_guild.create_category('Mirai Countdown');
     countdown_channel = await countdown_category.create_text_channel(f'{interaction.user.name}-day-{self.days}');
 
+    # Edits original interaction message with link to new channel
     embed = discord.Embed();
     embed.color = discord.Colour(3066993);
     embed.description = f"Countdown successfully set in {countdown_channel.mention}!";
     await interaction.response.edit_message(embed=embed, view=None);
 
-    return await countdown_channel.send(f'{interaction.user.mention} Day {self.days}! Good luck :D');
+    # Pings user in created channel
+    return await countdown_channel.send(f'{interaction.user.mention} Day {self.days}! Good luck :D'); 
 
-  # Registering slash command
+  # Register slash command
   @slash_command(guild_ids=config["guildIDs"], description="Starts a countdown from a set number of days")
   async def countdown(self, ctx, days: Option(int, "Enter number of days!", required=False)):
     if not days:
