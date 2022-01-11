@@ -30,7 +30,7 @@ class About(commands.Cog):
 
     return embed;
 
-  # Registering slash command
+  # Register slash command
   @slash_command(guild_ids=config["guildIDs"], description="Displays information about Mirai")
   async def about(self, ctx):
     embed = self.generate_about_embed(ctx);
