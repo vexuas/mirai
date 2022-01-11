@@ -21,6 +21,16 @@ class Countdown(commands.Cog):
 
      return embed;     
 
+  def generate_buttons(self):
+    confirm_button = Button(label="Let's go!", style=discord.ButtonStyle.success);
+    cancel_button = Button(label="Cancel", style=discord.ButtonStyle.secondary);
+
+    view = View();
+    view.add_item(cancel_button);
+    view.add_item(confirm_button);
+
+    return view;
+
   # Registering slash command
   @slash_command(guild_ids=config["guildIDs"], description="Starts a countdown from a set number of days")
   async def countdown(self, ctx, days: Option(int, "Enter number of days!", required=False)):
@@ -28,11 +38,7 @@ class Countdown(commands.Cog):
       embed = self.generate_countdown_information_embed();
       return await ctx.respond(embed=embed);
 
-    confirm_button = Button(label="Let's go!", style=discord.ButtonStyle.success);
-    cancel_button = Button(label="Cancel", style=discord.ButtonStyle.secondary);
-    actions_view = View();
-    actions_view.add_item(cancel_button);
-    actions_view.add_item(confirm_button);
+    actions_view = self.generate_buttons();
 
     return await ctx.respond(f'Coundown with {days} days!', view=actions_view);
 
