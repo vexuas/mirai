@@ -44,14 +44,26 @@ class Countdown(commands.Cog):
     view.add_item(cancel_button);
     view.add_item(confirm_button);
 
+    confirm_button.callback = self.handle_on_confirm;
     cancel_button.callback = self.handle_on_cancel;
-
-    return view;
     
+    return view;
+      
   async def handle_on_cancel(self, interaction):
     embed = discord.Embed();
     embed.color = discord.Colour(16711680);
     embed.description = "Cancelled Countdown";
+
+    return await interaction.response.edit_message(embed=embed, view=None);
+
+  async def handle_on_confirm(self, interaction):
+    current_guild = await self.bot.fetch_guild(interaction.guild_id);
+    countdown_category = await current_guild.create_category('Countdown');
+    countdown_channel = await countdown_category.create_text_channel(f'{interaction.user.name}-day-{self.days}');
+
+    embed = discord.Embed();
+    embed.color = discord.Colour(3066993);
+    embed.description = f"Countdown successfully set in {countdown_channel.mention}!";
 
     return await interaction.response.edit_message(embed=embed, view=None);
 
@@ -62,6 +74,7 @@ class Countdown(commands.Cog):
       embed = self.generate_countdown_information_embed();
       return await ctx.respond(embed=embed);
 
+    self.days = days;
     actions_view = self.generate_buttons();
     embed = self.generate_countdown_confirmation_embed(days);
 
