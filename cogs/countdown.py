@@ -64,8 +64,9 @@ class Countdown(commands.Cog):
     embed = discord.Embed();
     embed.color = discord.Colour(3066993);
     embed.description = f"Countdown successfully set in {countdown_channel.mention}!";
+    await interaction.response.edit_message(embed=embed, view=None);
 
-    return await interaction.response.edit_message(embed=embed, view=None);
+    return await countdown_channel.send(f'{interaction.user.mention} Day {self.days}! Good luck :D');
 
   # Registering slash command
   @slash_command(guild_ids=config["guildIDs"], description="Starts a countdown from a set number of days")
