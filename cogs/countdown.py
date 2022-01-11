@@ -44,8 +44,17 @@ class Countdown(commands.Cog):
     view.add_item(cancel_button);
     view.add_item(confirm_button);
 
+    cancel_button.callback = self.handle_on_cancel;
+
     return view;
     
+  async def handle_on_cancel(self, interaction):
+    embed = discord.Embed();
+    embed.color = discord.Colour(16711680);
+    embed.description = "Cancelled Countdown";
+
+    return await interaction.response.edit_message(embed=embed, view=None);
+
   # Registering slash command
   @slash_command(guild_ids=config["guildIDs"], description="Starts a countdown from a set number of days")
   async def countdown(self, ctx, days: Option(int, "Enter number of days!", required=False)):
