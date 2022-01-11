@@ -13,7 +13,7 @@ class Countdown(commands.Cog):
   def __init__(self, bot: commands.Bot):
     self.bot = bot;
       
-  # Generates the embed going to be sent for the default countdown command    
+  # Generates embed going to be sent for the default countdown command    
   def generate_countdown_information_embed(self):
     embed = generate_embed();
     embed.title = "Countdown | Help";
@@ -21,6 +21,9 @@ class Countdown(commands.Cog):
 
     return embed;     
 
+  # Generates embed going to be sent when confirming the countdown command
+  # This is shown when the user uses the countdown command with the days argument
+  # days: number of days - int
   def generate_countdown_confirmation_embed(self, days):
     embed = generate_embed();
     embed.title = "Countdown | Confirmation";
@@ -28,6 +31,11 @@ class Countdown(commands.Cog):
 
     return embed;
 
+  # Generates the buttons view
+  # Components need to be inside a View for them to properly work; View can be taken as a container
+  # Buttons are inserted and pushed to the right with subsequent additions
+  # A tad bit frustrating as there's currently no option to make them float right; Messages look off with buttons and a long length embed
+  # Maybe check if components can be inserted inside an embed
   def generate_buttons(self):
     confirm_button = Button(label="Let's go!", style=discord.ButtonStyle.success);
     cancel_button = Button(label="Cancel", style=discord.ButtonStyle.secondary);
