@@ -98,6 +98,15 @@ class Countdown(commands.Cog):
     if not days:
       embed = self.generate_countdown_information_embed();
       return await ctx.respond(embed=embed);
+      
+    user_countdown = CountdownDatabase().get_countdown(ctx.user.id, ctx.guild.id);
+
+    if user_countdown:
+      countdown_channel = self.bot.get_channel(user_countdown["channel_id"]);
+      embed = discord.Embed();
+      embed.color = discord.Colour(16776960);
+      embed.description = f'You already have a countdown set in {countdown_channel.mention}';
+      return await ctx.respond(embed=embed);
 
     self.days = days;
     actions_view = self.generate_buttons();
