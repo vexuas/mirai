@@ -1,10 +1,11 @@
 import discord;
 import json;
 from discord.commands import slash_command, Option;
-from discord.ext import commands
-from discord.ui import Button, View
+from discord.ext import commands;
+from discord.ui import Button, View;
+from database.countdown_db import CountdownDatabase;
 
-from helpers import generate_embed;
+from helpers import Helpers;
 
 with open("config/mirai.json") as file:
   config = json.load(file);
@@ -15,7 +16,7 @@ class Countdown(commands.Cog):
       
   # Generates embed going to be sent for the default countdown command    
   def generate_countdown_information_embed(self):
-    embed = generate_embed();
+    embed = Helpers().generate_embed();
     embed.title = "Countdown | Help";
     embed.description = "The Countdown command, as the name suggests, counts down from a specified number of days.\n\nWhen prompted, I will create a separate channel to keep track of the remaining days and will ping you there daily until the end!\n\nTo use this command, simply add your desired days after `/countdown`";
 
@@ -25,7 +26,7 @@ class Countdown(commands.Cog):
   # This is shown when the user uses the countdown command with the days argument
   # days: number of days - int
   def generate_countdown_confirmation_embed(self, days):
-    embed = generate_embed();
+    embed = Helpers().generate_embed();
     embed.title = "Countdown | Confirmation";
     embed.description = f"You've created a countdown of {days} days.\n\nBy confirming below, I'll create a separate channel where I'll ping you daily on the number of days left\n\nGood luck with your goal! :D"
 
@@ -59,8 +60,9 @@ class Countdown(commands.Cog):
     return await interaction.response.edit_message(embed=embed, view=None);
 
   # Handler when a user clicks the Let's go Button
-  # 3 parts:
+  # 4 parts:
   # - Creates a new channel under a new category
+  # - Creates a countdown instance in our database
   # - Edits the original interaction message with a success message with a link to the newly created channel
   # - Finally pings the user on the newly created channel the start of the countdown
   # I initially wanted to move the user to the text channel but seems discord doesn't support that; only voice channel movement. 
@@ -70,6 +72,16 @@ class Countdown(commands.Cog):
     current_guild = await self.bot.fetch_guild(interaction.guild_id);
     countdown_category = await current_guild.create_category('Mirai Countdown');
     countdown_channel = await countdown_category.create_text_channel(f'{interaction.user.name}-day-{self.days}');
+
+    # Creates a countdown instance in our database
+    # More information in countdown_db
+    CountdownDatabase({
+      "user": interaction.user,
+      "guild": current_guild,
+      "category_channel": countdown_category,
+      "channel": countdown_channel,
+      "days": self.days      
+    }).create_countdown();
 
     # Edits original interaction message with link to new channel
     embed = discord.Embed();

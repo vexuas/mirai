@@ -133,3 +133,7 @@ dmypy.json
 /config
 
 /node_modules
+
+# database
+/database/mirai.db
+/database/mirai.db-journal

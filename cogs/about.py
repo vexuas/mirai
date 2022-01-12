@@ -1,7 +1,8 @@
 import json;
 from discord.commands import slash_command;
 from discord.ext import commands;
-from helpers import generate_embed;
+
+from helpers import Helpers;
 
 # Reads package.json file; mostly to retrieve bot version
 with open("package.json") as file:
@@ -17,7 +18,7 @@ class About(commands.Cog):
   # Generates the embed going to be sent for the about command
   # client: initialising discord client
   def generate_about_embed(self, client):
-    embed = generate_embed();
+    embed = Helpers().generate_embed();
     embed.title = "About";
     embed.description = "Hi there! I'm Mirai and I'm a simple bot that counts down from a set number of days!\n\nMy creator made me as it helps him stay focused and keep him in check with his personal goals. Also because he wanted to create his first Python Project!\n\nI hope I can help you as much as I've helped him! (◕ᴗ◕✿)";
 
