@@ -1,8 +1,9 @@
 import discord;
 import json;
 from discord.commands import slash_command, Option;
-from discord.ext import commands
-from discord.ui import Button, View
+from discord.ext import commands;
+from discord.ui import Button, View;
+from database.countdown_db import CountdownDatabase;
 
 from helpers import generate_embed;
 
@@ -77,6 +78,14 @@ class Countdown(commands.Cog):
     embed.description = f"Countdown successfully set in {countdown_channel.mention}!";
     await interaction.response.edit_message(embed=embed, view=None);
 
+    CountdownDatabase({
+      "user": interaction.user,
+      "guild": current_guild,
+      "category_channel": countdown_category,
+      "channel": countdown_channel,
+      "days": self.days      
+    }).create_countdown();
+    
     # Pings user in created channel
     return await countdown_channel.send(f'{interaction.user.mention} Day {self.days}! Good luck :D'); 
 
