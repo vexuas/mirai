@@ -55,10 +55,13 @@ class CountdownDatabase():
     get_countdown = f"""
       SELECT * FROM Countdown WHERE user_id=:user_id AND guild_id=:guild_id
     """
-    
+
     cursor.execute(get_countdown, {"user_id" : user_id, "guild_id": guild_id});
     countdown = cursor.fetchone();
     return countdown;
+    
+  def delete_countdown(self):
+    pass;
     
   def dict_factory(self, cursor, row):
     d = {};

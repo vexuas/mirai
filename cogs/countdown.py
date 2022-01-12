@@ -94,12 +94,23 @@ class Countdown(commands.Cog):
 
   # Register slash command
   @slash_command(guild_ids=config["guildIDs"], description="Starts a countdown from a set number of days")
-  async def countdown(self, ctx, days: Option(int, "Enter number of days!", required=False)):
-    if not days:
+  async def countdown(self, ctx, days: Option(int, "Enter number of days!", required=False), stop: Option(discord.TextChannel, "Stops an existing countdown", required=False)):
+    if not days and not stop:
       embed = self.generate_countdown_information_embed();
       return await ctx.respond(embed=embed);
       
     user_countdown = CountdownDatabase().get_countdown(ctx.user.id, ctx.guild.id);
+
+    if stop:
+      embed = discord.Embed();
+      if user_countdown and stop.id == user_countdown["channel_id"]:
+        embed.color = discord.Colour(16711680);
+        embed.description = f"Stopped Countdown";
+        return await ctx.respond(embed=embed);
+
+      embed.color = discord.Colour(16776960);
+      embed.description = "Selected channel doesn't have a countdown";
+      return await ctx.respond(embed=embed);
 
     if user_countdown:
       countdown_channel = self.bot.get_channel(user_countdown["channel_id"]);
@@ -107,7 +118,7 @@ class Countdown(commands.Cog):
       embed.color = discord.Colour(16776960);
       embed.description = f'You already have a countdown set in {countdown_channel.mention}';
       return await ctx.respond(embed=embed);
-
+      
     self.days = days;
     actions_view = self.generate_buttons();
     embed = self.generate_countdown_confirmation_embed(days);
