@@ -2,8 +2,11 @@ import sqlite3;
 
 from helpers import Helpers;
 
+# All things countdown data related
+# Getting the hang of classes pog
 class CountdownDatabase():
   def __init__(self, countdown_data=None):
+    # We only want to keep track of data if it's passed in
     if countdown_data:
       self.uuid = Helpers().generate_uuid();
       self.user = countdown_data and countdown_data["user"];
@@ -11,7 +14,7 @@ class CountdownDatabase():
       self.category_channel = countdown_data["category_channel"];
       self.channel = countdown_data["channel"];
       self.days = countdown_data["days"];
-    self.create_database();
+    self.create_database(); # creates database with table if it doesn't exist every time class is called
 
   # Initialises connection with database
   # Creates one if it doesn't exist
@@ -19,6 +22,9 @@ class CountdownDatabase():
     connection = sqlite3.connect('database/mirai.db');
     return connection;
 
+  # Creates main table with relevant columns
+  # I stringified uuid since seems too much to create an adapter to make uuid types to work
+  # TODO: Add date created and date ending for countdown
   def create_database(self):
     mirai_database = self.connect_database();
     cursor = mirai_database.cursor();
@@ -28,6 +34,8 @@ class CountdownDatabase():
     """
     return cursor.execute(create_table);
     
+  # Inserts new countdown to our database
+  # There might be a better way to insert data; settled with this qmark style since it's straightforward albeit constrained 
   def create_countdown(self):
     mirai_database = self.connect_database();
     cursor = mirai_database.cursor();
@@ -38,7 +46,6 @@ class CountdownDatabase():
     cursor.execute(insert_countdown, (self.uuid, self.days, self.user.name, self.user.id, self.guild.name, self.guild.id, self.category_channel.id, self.channel.id));
     
     return mirai_database.commit();
-    
     
     
 

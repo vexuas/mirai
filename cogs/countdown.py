@@ -60,8 +60,9 @@ class Countdown(commands.Cog):
     return await interaction.response.edit_message(embed=embed, view=None);
 
   # Handler when a user clicks the Let's go Button
-  # 3 parts:
+  # 4 parts:
   # - Creates a new channel under a new category
+  # - Creates a countdown instance in our database
   # - Edits the original interaction message with a success message with a link to the newly created channel
   # - Finally pings the user on the newly created channel the start of the countdown
   # I initially wanted to move the user to the text channel but seems discord doesn't support that; only voice channel movement. 
@@ -72,12 +73,8 @@ class Countdown(commands.Cog):
     countdown_category = await current_guild.create_category('Mirai Countdown');
     countdown_channel = await countdown_category.create_text_channel(f'{interaction.user.name}-day-{self.days}');
 
-    # Edits original interaction message with link to new channel
-    embed = discord.Embed();
-    embed.color = discord.Colour(3066993);
-    embed.description = f"Countdown successfully set in {countdown_channel.mention}!";
-    await interaction.response.edit_message(embed=embed, view=None);
-
+    # Creates a countdown instance in our database
+    # More information in countdown_db
     CountdownDatabase({
       "user": interaction.user,
       "guild": current_guild,
@@ -85,6 +82,12 @@ class Countdown(commands.Cog):
       "channel": countdown_channel,
       "days": self.days      
     }).create_countdown();
+
+    # Edits original interaction message with link to new channel
+    embed = discord.Embed();
+    embed.color = discord.Colour(3066993);
+    embed.description = f"Countdown successfully set in {countdown_channel.mention}!";
+    await interaction.response.edit_message(embed=embed, view=None);
 
     # Pings user in created channel
     return await countdown_channel.send(f'{interaction.user.mention} Day {self.days}! Good luck :D'); 
