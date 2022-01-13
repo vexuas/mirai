@@ -1,6 +1,8 @@
 import sqlite3;
+import datetime;
 
-from helpers import Helpers;
+from helpers import Helpers
+from timer.day_timer import DayTimer;
 
 # All things countdown data related
 # Getting the hang of classes pog
@@ -14,6 +16,8 @@ class CountdownDatabase():
       self.category_channel = countdown_data["category_channel"];
       self.channel = countdown_data["channel"];
       self.days = countdown_data["days"];
+      self.started_at = datetime.datetime.now();
+      self.ends_at = datetime.datetime.now() + datetime.timedelta(days=countdown_data["days"]);
     self.create_database(); # creates database with table if it doesn't exist every time class is called
 
   # Initialises connection with database
@@ -30,7 +34,7 @@ class CountdownDatabase():
     cursor = mirai_database.cursor();
     create_table = """
       CREATE TABLE IF NOT EXISTS
-      Countdown(uuid TEXT NOT NULL PRIMARY KEY, days INTEGER NOT NULL, user_name TEXT NOT NULL, user_id INTEGER NOT NULL, guild_name TEXT NOT NULL, guild_id INTEGER NOT NULL, category_channel_id INTEGER NOT NULL, channel_id INTEGER NOT NULL)
+      Countdown(uuid TEXT NOT NULL PRIMARY KEY, days INTEGER NOT NULL, started_at DATE NOT NULL, ends_at DATE NOT NULL, user_name TEXT NOT NULL, user_id INTEGER NOT NULL, guild_name TEXT NOT NULL, guild_id INTEGER NOT NULL, category_channel_id INTEGER NOT NULL, channel_id INTEGER NOT NULL)
     """
     return cursor.execute(create_table);
     
@@ -41,9 +45,9 @@ class CountdownDatabase():
     cursor = mirai_database.cursor();
     insert_countdown = f"""
       INSERT INTO
-      Countdown VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      Countdown VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
-    cursor.execute(insert_countdown, (self.uuid, self.days, self.user.name, self.user.id, self.guild.name, self.guild.id, self.category_channel.id, self.channel.id));
+    cursor.execute(insert_countdown, (self.uuid, self.days, self.started_at, self.ends_at, self.user.name, self.user.id, self.guild.name, self.guild.id, self.category_channel.id, self.channel.id));
     
     return mirai_database.commit();
     
@@ -63,6 +67,7 @@ class CountdownDatabase():
 
     cursor.execute(get_countdown, {"user_id" : user_id, "guild_id": guild_id});
     countdown = cursor.fetchone();
+    DayTimer(countdown);
     return countdown;
     
   # Deletes a countdown from our database  
