@@ -104,12 +104,16 @@ class Countdown(commands.Cog):
     if stop:
       embed = discord.Embed();
       if user_countdown and stop.id == user_countdown["channel_id"]:
+        countdown_channel = self.bot.get_channel(user_countdown["channel_id"]);
+        CountdownDatabase().delete_countdown(user_countdown["uuid"]);
+        await countdown_channel.category.delete();
+        await countdown_channel.delete();
         embed.color = discord.Colour(16711680);
         embed.description = f"Stopped Countdown";
         return await ctx.respond(embed=embed);
 
       embed.color = discord.Colour(16776960);
-      embed.description = "Selected channel doesn't have a countdown";
+      embed.description = "Selected channel doesn't have a countdown linked to user";
       return await ctx.respond(embed=embed);
 
     if user_countdown:

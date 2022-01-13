@@ -60,8 +60,15 @@ class CountdownDatabase():
     countdown = cursor.fetchone();
     return countdown;
     
-  def delete_countdown(self):
-    pass;
+  def delete_countdown(self, uuid):
+    mirai_database = self.connect_database();
+    cursor = mirai_database.cursor();
+    delete_countdown = f"""
+      DELETE FROM Countdown WHERE uuid=:uuid
+    """
+
+    cursor.execute(delete_countdown, {"uuid": uuid});
+    return mirai_database.commit();
     
   def dict_factory(self, cursor, row):
     d = {};
