@@ -47,8 +47,39 @@ class CountdownDatabase():
     
     return mirai_database.commit();
     
-    
+  # Retrieves a countdown from our database
+  # By default, the data returned would be in a tuple
+  # To change this, I've made a factory below that transforms the data into a dictionary  
+  # Found a better way to link variables in a sql statement; will keep both patterns for learnings
+  # user_id: id of user who initialised command
+  # guild_id: id of guild where command was initialised
+  def get_countdown(self, user_id, guild_id):
+    mirai_database = self.connect_database();
+    mirai_database.row_factory = self.dict_factory # Tells the database to transform data into a dictionary
+    cursor = mirai_database.cursor();
+    get_countdown = f"""
+      SELECT * FROM Countdown WHERE user_id=:user_id AND guild_id=:guild_id
+    """
 
+    cursor.execute(get_countdown, {"user_id" : user_id, "guild_id": guild_id});
+    countdown = cursor.fetchone();
+    return countdown;
     
+  # Deletes a countdown from our database  
+  # uuid: unique identifier of countdown
+  def delete_countdown(self, uuid):
+    mirai_database = self.connect_database();
+    cursor = mirai_database.cursor();
+    delete_countdown = f"""
+      DELETE FROM Countdown WHERE uuid=:uuid
+    """
 
-  
+    cursor.execute(delete_countdown, {"uuid": uuid});
+    return mirai_database.commit();
+    
+  # Changes data into a dictionary  
+  def dict_factory(self, cursor, row):
+    d = {};
+    for index, col in enumerate(cursor.description):
+      d[col[0]] = row[index];
+    return d;
