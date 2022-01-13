@@ -92,15 +92,24 @@ class Countdown(commands.Cog):
     # Pings user in created channel
     return await countdown_channel.send(f'{interaction.user.mention} Day {self.days}! Good luck :D'); 
 
-  # Register slash command
+  # Register slash command and main handler for initialisation
   @slash_command(guild_ids=config["guildIDs"], description="Starts a countdown from a set number of days")
   async def countdown(self, ctx, days: Option(int, "Enter number of days!", required=False), stop: Option(discord.TextChannel, "Stops an existing countdown", required=False)):
+    # If no options are passed, we show the command information
     if not days and not stop:
       embed = self.generate_countdown_information_embed();
       return await ctx.respond(embed=embed);
-      
+
+    # Checks if the user has an existing countdown within the guild  
     user_countdown = CountdownDatabase().get_countdown(ctx.user.id, ctx.guild.id);
 
+    # Stop option handler
+    # If user has a countdown in the guild and selects the countdown channel
+    # - We delete the category channel and the countdown channel
+    # - We then delete the countdown instance in our database
+    # - Finally we end an appropriate embed message
+    # If user doesn't have a countdown nor selected an existing countdown channel
+    # - Send a warning message that there's no countdown linked to the user
     if stop:
       embed = discord.Embed();
       if user_countdown and stop.id == user_countdown["channel_id"]:
@@ -116,6 +125,10 @@ class Countdown(commands.Cog):
       embed.description = "Selected channel doesn't have a countdown linked to user";
       return await ctx.respond(embed=embed);
 
+    # Days option handler
+    # If the user has an existing countdown
+    # - We send a warning with a link to the existing countdown channel
+    # Else we send the countdown confirmation message
     if user_countdown:
       countdown_channel = self.bot.get_channel(user_countdown["channel_id"]);
       embed = discord.Embed();
