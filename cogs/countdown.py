@@ -7,8 +7,7 @@ from discord.ui import Button, View;
 from database.countdown_db import CountdownDatabase;
 
 from helpers import Helpers
-from timer.day_timer import DayTimer
-from timer.full_timer import FullTimer;
+from timer.timer import Timer;
 
 with open("config/mirai.json") as file:
   config = json.load(file);
@@ -95,7 +94,14 @@ class Countdown(commands.Cog):
     # Pings user in created channel
     # await countdown_channel.send(f'{interaction.user.mention} Day {self.days}! Good luck :D'); 
     
-    return await FullTimer(countdown_channel).start();
+    return await self.start_countdown(interaction.user.id, interaction.guild.id);
+
+  async def start_countdown(self, user_id, guild_id):
+    countdown = CountdownDatabase().get_countdown(user_id, guild_id);
+    countdown_channel = self.bot.get_channel(countdown["channel_id"]);
+    user = await self.bot.fetch_user(countdown["user_id"]);
+
+    return await Timer(countdown_channel, user, countdown).start();
 
   # Register slash command and main handler for initialisation
   @slash_command(guild_ids=config["guildIDs"], description="Starts a countdown from a set number of days")
