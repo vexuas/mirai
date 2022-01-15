@@ -1,9 +1,20 @@
 import datetime;
 import asyncio
+
 from helpers import Helpers;
 
-
+# All things timer related
+# Out of all the things, this was probably the toughest to implement
+# The recurring timer itself isn't much of an issue, more on the Python approach of things
+# With javascript slapping a setInterval is good enough, here I found out isn't as straightforward
+# Ended up using asyncio since it's far easier to use instead of Timer
+# Although not really sure if I'm using it right; if it works it works *shrug*
 class Timer():
+  # Timer initialisation
+  # channel: discord TextChannel - for sending purposes
+  # user: discord User - for pinging purposes
+  # countdown: countdown instance from our database
+  # type: if timer should use days or minutes; latter more on testing but could be an additional feature in the future
   def __init__(self, channel, user, countdown, type="day"):
     self.date_now = datetime.datetime.now();
     self.started_at = Helpers().format_to_datetime(countdown["started_at"]);
@@ -13,6 +24,7 @@ class Timer():
     self.channel = channel;
     self.type = type;
 
+    # Sets up timer pointers based on days or minutes
     if self.type == 'day':
       self.passed_time = (self.date_now - self.started_at).days;
       self.current_time = self.days - self.passed_time;
@@ -23,17 +35,25 @@ class Timer():
       self.current_time = self.days - self.passed_time;
       self.next_date = self.started_at + datetime.timedelta(minutes=self.passed_time + 1);
 
+  # Starts timer
+  # In essence, the whole timer works as a bundle of individual day timers
+  # This means that after a timer is done for the day, we create a new timer for the next day after
+  # In order to do this, this start function calls itself after it finishes the day timer
+  # This continues until the current time is after the end date; which in turn would send the end countdown message
   async def start(self):
     if(self.date_now < self.ends_at):
-      difference = (self.next_date - self.date_now).seconds
-      await self.start_day_timer(self.user, self.channel, difference, self.current_time);
-      await asyncio.sleep(3);
-      self.update_next_timer();
-      await self.start();
+      difference = (self.next_date - self.date_now).seconds # seconds between current time and the time when day should be passed over
+      await self.start_day_timer(self.user, self.channel, difference, self.current_time); # start individual day timer
+      await asyncio.sleep(3); # Buffer time; perhaps there's a better way of going about this
+      self.update_next_timer(); # Updates timer pointers for the next day
+      await self.start(); # Calls itself
     else:
-      await self.channel.send(f'{self.user.mention} Day 0');
+      # Send end of countdown message
+      embed = self.generate_end_countdown_embed();
+      await self.channel.send(f'{self.user.mention}', embed=embed);
     
-
+  # Updates timer pointers for next day
+  # Important to keep the timer flowing
   def update_next_timer(self):
     self.date_now = datetime.datetime.now();
     if self.type == 'day':
@@ -45,6 +65,14 @@ class Timer():
       self.current_time = self.days - self.passed_time;
       self.next_date = self.started_at + datetime.timedelta(minutes=self.passed_time + 1);
 
+  # Individual day timer
+  # Sends a message to the countdown channel with the current day counter
+  # Then waits until the time when the day should be passed over
+  # user: discord User
+  # channel: discord TextChannel
+  # difference: seconds between current time and the time when day should be passed over
+  # current: the current day the countdown is in
+  # Maybe refactor this to not use passed in arguments
   async def start_day_timer(self, user, channel, difference, current):  
     async def start_countdown():
       countdown_message = f"{user.mention} Day {current}! Good luck :D" if current == self.days else f"{user.mention} Day {current}"
@@ -52,3 +80,11 @@ class Timer():
       return await asyncio.sleep(difference);
 
     await start_countdown()
+
+  # Generates embed for the end countdown message
+  def generate_end_countdown_embed(self):
+    embed = Helpers().generate_embed();
+    embed.title = "Day 0";
+    embed.description = "End Reached!\n\nI hope you got close to your goal! :D\n\nTo close this channel, click the button below";
+
+    return embed;
