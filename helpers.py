@@ -1,5 +1,6 @@
 import discord;
 import uuid;
+import datetime;
 
 class Helpers():
   def __init__(self) -> None:
@@ -16,3 +17,6 @@ class Helpers():
   # Generates a UUID
   def generate_uuid(self):
     return str(uuid.uuid4());
+
+  def format_to_datetime(self, date_string):
+    return datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S.%f');

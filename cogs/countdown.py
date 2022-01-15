@@ -1,11 +1,13 @@
 import discord;
 import json;
+import asyncio;
 from discord.commands import slash_command, Option;
 from discord.ext import commands;
 from discord.ui import Button, View;
 from database.countdown_db import CountdownDatabase;
 
-from helpers import Helpers;
+from helpers import Helpers
+from timer.timer import Timer;
 
 with open("config/mirai.json") as file:
   config = json.load(file);
@@ -64,7 +66,7 @@ class Countdown(commands.Cog):
   # - Creates a new channel under a new category
   # - Creates a countdown instance in our database
   # - Edits the original interaction message with a success message with a link to the newly created channel
-  # - Finally pings the user on the newly created channel the start of the countdown
+  # - Finally starts the countdown timer
   # I initially wanted to move the user to the text channel but seems discord doesn't support that; only voice channel movement. 
   # I guess it's hard to keep track and merits probably doesn't outweight the implementation
   async def handle_on_confirm(self, interaction):
@@ -89,8 +91,21 @@ class Countdown(commands.Cog):
     embed.description = f"Countdown successfully set in {countdown_channel.mention}!";
     await interaction.response.edit_message(embed=embed, view=None);
 
-    # Pings user in created channel
-    return await countdown_channel.send(f'{interaction.user.mention} Day {self.days}! Good luck :D'); 
+    # Calls the start_countdown function to start timer
+    return await self.start_countdown(interaction.user.id, interaction.guild.id);
+
+  # Starts countdown timer
+  # Retrieves countdown instance from our database 
+  # Also retrieves user and channel data from discord; this is so we can properly send messages and mention the user
+  # Finally calls the Timer class to start timer; more information in timer.py
+  # user_id: id of user who started the countdown
+  # guild_id: id of guild where countdown was started
+  async def start_countdown(self, user_id, guild_id):
+    countdown = CountdownDatabase().get_countdown(user_id, guild_id);
+    countdown_channel = self.bot.get_channel(countdown["channel_id"]);
+    user = await self.bot.fetch_user(countdown["user_id"]);
+
+    return await Timer(countdown_channel, user, countdown, type="minute").start();
 
   # Register slash command and main handler for initialisation
   @slash_command(guild_ids=config["guildIDs"], description="Starts a countdown from a set number of days")
@@ -134,6 +149,7 @@ class Countdown(commands.Cog):
       embed = discord.Embed();
       embed.color = discord.Colour(16776960);
       embed.description = f'You already have a countdown set in {countdown_channel.mention}';
+      
       return await ctx.respond(embed=embed);
       
     self.days = days;
