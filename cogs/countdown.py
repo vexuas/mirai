@@ -1,11 +1,13 @@
 import discord;
 import json;
+import asyncio;
 from discord.commands import slash_command, Option;
 from discord.ext import commands;
 from discord.ui import Button, View;
 from database.countdown_db import CountdownDatabase;
 
-from helpers import Helpers;
+from helpers import Helpers
+from timer.day_timer import DayTimer;
 
 with open("config/mirai.json") as file:
   config = json.load(file);
@@ -134,7 +136,9 @@ class Countdown(commands.Cog):
       embed = discord.Embed();
       embed.color = discord.Colour(16776960);
       embed.description = f'You already have a countdown set in {countdown_channel.mention}';
-      return await ctx.respond(embed=embed);
+      await ctx.respond(embed=embed);
+      
+      return await DayTimer(user_countdown).start(countdown_channel);
       
     self.days = days;
     actions_view = self.generate_buttons();

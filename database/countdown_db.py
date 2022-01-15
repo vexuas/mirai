@@ -2,7 +2,6 @@ import sqlite3;
 import datetime;
 
 from helpers import Helpers
-from timer.day_timer import DayTimer;
 
 # All things countdown data related
 # Getting the hang of classes pog
@@ -67,7 +66,6 @@ class CountdownDatabase():
 
     cursor.execute(get_countdown, {"user_id" : user_id, "guild_id": guild_id});
     countdown = cursor.fetchone();
-    DayTimer(countdown);
     return countdown;
     
   # Deletes a countdown from our database  
