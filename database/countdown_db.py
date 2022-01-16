@@ -80,7 +80,7 @@ class CountdownDatabase():
     delete_countdown = f"""
       DELETE FROM Countdown WHERE uuid=:uuid
     """
-
+    # TODO: Figure out how to properly cancel existing asyncio sleep tasks when stopping countdown
     cursor.execute(delete_countdown, {"uuid": uuid});
     return mirai_database.commit();
     
