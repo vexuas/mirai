@@ -33,7 +33,7 @@ class CountdownDatabase():
     cursor = mirai_database.cursor();
     create_table = """
       CREATE TABLE IF NOT EXISTS
-      Countdown(uuid TEXT NOT NULL PRIMARY KEY, days INTEGER NOT NULL, started_at DATE NOT NULL, ends_at DATE NOT NULL, user_name TEXT NOT NULL, user_id INTEGER NOT NULL, guild_name TEXT NOT NULL, guild_id INTEGER NOT NULL, category_channel_id INTEGER NOT NULL, channel_id INTEGER NOT NULL)
+      Countdown(uuid TEXT NOT NULL PRIMARY KEY, days INTEGER NOT NULL, started_at DATE NOT NULL, ends_at DATE NOT NULL, user_name TEXT NOT NULL, user_id INTEGER NOT NULL, guild_name TEXT NOT NULL, guild_id INTEGER NOT NULL, category_channel_id INTEGER NOT NULL, channel_id INTEGER NOT NULL, message_id INTEGER)
     """
     return cursor.execute(create_table);
     
@@ -44,9 +44,9 @@ class CountdownDatabase():
     cursor = mirai_database.cursor();
     insert_countdown = f"""
       INSERT INTO
-      Countdown VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      Countdown VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """
-    cursor.execute(insert_countdown, (self.uuid, self.days, self.started_at, self.ends_at, self.user.name, self.user.id, self.guild.name, self.guild.id, self.category_channel.id, self.channel.id));
+    cursor.execute(insert_countdown, (self.uuid, self.days, self.started_at, self.ends_at, self.user.name, self.user.id, self.guild.name, self.guild.id, self.category_channel.id, self.channel.id, None));
     
     return mirai_database.commit();
     
@@ -54,17 +54,21 @@ class CountdownDatabase():
   # By default, the data returned would be in a tuple
   # To change this, I've made a factory below that transforms the data into a dictionary  
   # Found a better way to link variables in a sql statement; will keep both patterns for learnings
+  # Either retrieves countdown using uuid or a combination of userid and guildid
   # user_id: id of user who initialised command
   # guild_id: id of guild where command was initialised
-  def get_countdown(self, user_id, guild_id):
+  # uuid: unique identifier of countdown
+  def get_countdown(self, user_id=None, guild_id=None, uuid=None):
     mirai_database = self.connect_database();
     mirai_database.row_factory = self.dict_factory # Tells the database to transform data into a dictionary
     cursor = mirai_database.cursor();
     get_countdown = f"""
+      SELECT * FROM Countdown WHERE uuid=:uuid
+    """ if uuid else f"""
       SELECT * FROM Countdown WHERE user_id=:user_id AND guild_id=:guild_id
     """
 
-    cursor.execute(get_countdown, {"user_id" : user_id, "guild_id": guild_id});
+    cursor.execute(get_countdown, {"uuid": uuid}) if uuid else cursor.execute(get_countdown, {"user_id" : user_id, "guild_id": guild_id})
     countdown = cursor.fetchone();
     return countdown;
     
@@ -80,6 +84,15 @@ class CountdownDatabase():
     cursor.execute(delete_countdown, {"uuid": uuid});
     return mirai_database.commit();
     
+  def update_countdown_message(self, message_id, uuid):
+    mirai_database = self.connect_database();
+    cursor = mirai_database.cursor();
+    update_message = f"""
+      UPDATE Countdown SET message_id=:message_id WHERE uuid=:uuid
+    """
+    cursor.execute(update_message, {"message_id": message_id, "uuid": uuid});
+    return mirai_database.commit();
+
   # Changes data into a dictionary  
   def dict_factory(self, cursor, row):
     d = {};

@@ -1,5 +1,6 @@
 import datetime;
 import asyncio
+from database.countdown_db import CountdownDatabase;
 
 from helpers import Helpers;
 
@@ -19,7 +20,8 @@ class Timer():
     self.date_now = datetime.datetime.now();
     self.started_at = Helpers().format_to_datetime(countdown["started_at"]);
     self.ends_at = Helpers().format_to_datetime(countdown["ends_at"]);
-    self.days = countdown["days"]
+    self.days = countdown["days"];
+    self.countdown_uuid = countdown["uuid"];
     self.user = user;
     self.channel = channel;
     self.type = type;
@@ -44,6 +46,12 @@ class Timer():
     if(self.date_now < self.ends_at):
       difference = (self.next_date - self.date_now).seconds # seconds between current time and the time when day should be passed over
       await self.start_day_timer(self.user, self.channel, difference, self.current_time); # start individual day timer
+      # Deletes existing countdown message
+      # This is so we can properly ping the user in a new message when the day timer gets called again
+      countdown = CountdownDatabase().get_countdown(uuid=self.countdown_uuid);
+      message = await self.channel.fetch_message(countdown["message_id"]);
+      await message.delete();
+
       await asyncio.sleep(3); # Buffer time; perhaps there's a better way of going about this
       self.update_next_timer(); # Updates timer pointers for the next day
       await self.start(); # Calls itself
@@ -75,8 +83,11 @@ class Timer():
   # Maybe refactor this to not use passed in arguments
   async def start_day_timer(self, user, channel, difference, current):  
     async def start_countdown():
-      countdown_message = f"{user.mention} Day {current}! Good luck :D" if current == self.days else f"{user.mention} Day {current}"
-      await channel.send(countdown_message);
+      countdown_content = f"{user.mention} Day {current}! Good luck :D" if current == self.days else f"{user.mention} Day {current}"
+
+      countdown_message = await channel.send(countdown_content);
+      CountdownDatabase().update_countdown_message(countdown_message.id, self.countdown_uuid);
+
       return await asyncio.sleep(difference);
 
     await start_countdown()
