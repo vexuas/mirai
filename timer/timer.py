@@ -58,13 +58,14 @@ class Timer():
 
       await asyncio.sleep(3); # Buffer time; perhaps there's a better way of going about this
       self.update_next_timer(); # Updates timer pointers for the next day
-      await self.start(); # Calls itself
+      return await self.start(); # Calls itself
     else:
       # Send end of countdown message
       embed = self.generate_end_countdown_embed();
       view = self.generate_button();
       # await self.channel.edit(name=f"{self.user.name}-end"); # channel edit rate limit is 2 per 10 minutes
-      await self.channel.send(f'{self.user.mention}', embed=embed, view=view);
+      end_message = await self.channel.send(f'{self.user.mention}', embed=embed, view=view);
+      return CountdownDatabase().update_countdown_message(end_message.id, self.countdown_uuid);
     
   # Updates timer pointers for next day
   # Important to keep the timer flowing
@@ -97,7 +98,7 @@ class Timer():
 
       return await asyncio.sleep(difference);
 
-    await start_countdown()
+    return await start_countdown()
 
   # Generates embed for the end countdown message
   def generate_end_countdown_embed(self):
