@@ -10,6 +10,7 @@ from helpers import Helpers;
 # With javascript slapping a setInterval is good enough, here I found out isn't as straightforward
 # Ended up using asyncio since it's far easier to use instead of Timer
 # Although not really sure if I'm using it right; if it works it works *shrug*
+# TODO: Figure out how to properly cancel existing asyncio sleep tasks when stopping countdown
 class Timer():
   # Timer initialisation
   # channel: discord TextChannel - for sending purposes
@@ -49,7 +50,7 @@ class Timer():
       # Deletes existing countdown message
       # This is so we can properly ping the user in a new message when the day timer gets called again
       countdown = CountdownDatabase().get_countdown(uuid=self.countdown_uuid);
-      message = await self.channel.fetch_message(countdown["message_id"]);
+      message = self.channel.get_partial_message(countdown["message_id"]);
       await message.delete();
 
       await asyncio.sleep(3); # Buffer time; perhaps there's a better way of going about this
@@ -58,6 +59,7 @@ class Timer():
     else:
       # Send end of countdown message
       embed = self.generate_end_countdown_embed();
+      await self.channel.edit(name=f"{self.user.name}-countdown-end"); # channel edit rate limit is 2 per 10 minutes
       await self.channel.send(f'{self.user.mention}', embed=embed);
     
   # Updates timer pointers for next day
@@ -84,8 +86,9 @@ class Timer():
   async def start_day_timer(self, user, channel, difference, current):  
     async def start_countdown():
       countdown_content = f"{user.mention} Day {current}! Good luck :D" if current == self.days else f"{user.mention} Day {current}"
-
+      current != self.days and await self.channel.edit(name=f"{self.user.name}-day-{current}"); # channel edit rate limit is 2 per 10 minutes
       countdown_message = await channel.send(countdown_content);
+
       CountdownDatabase().update_countdown_message(countdown_message.id, self.countdown_uuid);
 
       return await asyncio.sleep(difference);
