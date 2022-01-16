@@ -1,5 +1,8 @@
 import datetime;
 import asyncio
+import discord;
+
+from discord.ui import Button, View
 from database.countdown_db import CountdownDatabase;
 
 from helpers import Helpers;
@@ -59,8 +62,9 @@ class Timer():
     else:
       # Send end of countdown message
       embed = self.generate_end_countdown_embed();
-      await self.channel.edit(name=f"{self.user.name}-countdown-end"); # channel edit rate limit is 2 per 10 minutes
-      await self.channel.send(f'{self.user.mention}', embed=embed);
+      view = self.generate_button();
+      # await self.channel.edit(name=f"{self.user.name}-end"); # channel edit rate limit is 2 per 10 minutes
+      await self.channel.send(f'{self.user.mention}', embed=embed, view=view);
     
   # Updates timer pointers for next day
   # Important to keep the timer flowing
@@ -86,7 +90,7 @@ class Timer():
   async def start_day_timer(self, user, channel, difference, current):  
     async def start_countdown():
       countdown_content = f"{user.mention} Day {current}! Good luck :D" if current == self.days else f"{user.mention} Day {current}"
-      current != self.days and await self.channel.edit(name=f"{self.user.name}-day-{current}"); # channel edit rate limit is 2 per 10 minutes
+      # current != self.days and await self.channel.edit(name=f"{self.user.name}-day-{current}"); # channel edit rate limit is 2 per 10 minutes
       countdown_message = await channel.send(countdown_content);
 
       CountdownDatabase().update_countdown_message(countdown_message.id, self.countdown_uuid);
@@ -100,5 +104,20 @@ class Timer():
     embed = Helpers().generate_embed();
     embed.title = "Day 0";
     embed.description = "End Reached!\n\nI hope you got close to your goal! :D\n\nTo close this channel, click the button below";
-
+    
     return embed;
+
+  def generate_button(self):
+    close_button = Button(label="Close", style=discord.ButtonStyle.secondary);
+
+    view = View();
+    view.add_item(close_button);
+
+    close_button.callback = self.handle_on_close;
+
+    return view;
+
+  async def handle_on_close(self, interaction):
+    CountdownDatabase().delete_countdown(self.countdown_uuid);
+    await interaction.channel.category.delete();
+    return await interaction.channel.delete();
