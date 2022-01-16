@@ -1,6 +1,6 @@
 {
   "name": "mirai",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "Countdown Discord Bot",
   "devDependencies": {
     "auto": "^10.32.5"
