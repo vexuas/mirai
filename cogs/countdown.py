@@ -108,7 +108,7 @@ class Countdown(commands.Cog):
     return await Timer(countdown_channel, user, countdown).start();
 
   # Register slash command and main handler for initialisation
-  @slash_command(guild_ids=config["guildIDs"], description="Starts a countdown from a set number of days")
+  @slash_command(description="Starts a countdown from a set number of days")
   async def countdown(self, ctx, days: Option(int, "Enter number of days!", required=False), stop: Option(discord.TextChannel, "Stops an existing countdown", required=False)):
     # If no options are passed, we show the command information
     if not days and not stop:
