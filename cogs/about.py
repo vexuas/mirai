@@ -26,7 +26,7 @@ class About(commands.Cog):
     embed.add_field(name="Date Created", value=client.user.created_at.strftime('%d-%b-%Y'), inline=True);
     embed.add_field(name="Version", value=package["version"], inline=True);
     embed.add_field(name="Library", value="Pycord", inline=True);
-    embed.add_field(name="Last Update", value="10-Jan-2022", inline=True);
+    embed.add_field(name="Last Update", value="17-Jan-2022", inline=True);
     embed.add_field(name="Source Code", value="[Github](https://github.com/vexuas/mirai)", inline=True);
 
     return embed;
