@@ -72,6 +72,17 @@ class CountdownDatabase():
     countdown = cursor.fetchone();
     return countdown;
     
+  def get_all_countdowns(self):
+    mirai_database = self.connect_database();
+    mirai_database.row_factory = self.dict_factory;
+    cursor = mirai_database.cursor();
+    get_all_countdowns = f"""
+      SELECT * FROM COUNTDOWN
+    """
+    cursor.execute(get_all_countdowns);
+    countdowns = cursor.fetchall();
+    return countdowns;
+
   # Deletes a countdown from our database  
   # uuid: unique identifier of countdown
   def delete_countdown(self, uuid):
