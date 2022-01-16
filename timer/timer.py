@@ -53,18 +53,28 @@ class Timer():
       # Deletes existing countdown message
       # This is so we can properly ping the user in a new message when the day timer gets called again
       countdown = CountdownDatabase().get_countdown(uuid=self.countdown_uuid);
-      message = self.channel.get_partial_message(countdown["message_id"]);
-      await message.delete();
 
-      await asyncio.sleep(3); # Buffer time; perhaps there's a better way of going about this
-      self.update_next_timer(); # Updates timer pointers for the next day
-      await self.start(); # Calls itself
+      # Wrapping the next timer calls in a countdown existence conditional
+      # I'll admit this is a ghetto alternative
+      # The proper way is to clear the existing asyncio tasks when we stop a countdown
+      # However, I'm not too versed with the module yet
+      # As the timer task isn't cleared, it will continue and finish leading to the methods below
+      # It will run into an error when trying to get the message as countdown doesn't exist anymore
+      # Hence to prevent that, this condition is made. Told you it was ghetto, maybe I'll refactor in the future
+      if countdown:
+        message = self.channel.get_partial_message(countdown["message_id"]);
+        await message.delete();
+
+        await asyncio.sleep(3); # Buffer time; perhaps there's a better way of going about this
+        self.update_next_timer(); # Updates timer pointers for the next day
+        return await self.start(); # Calls itself
     else:
       # Send end of countdown message
       embed = self.generate_end_countdown_embed();
       view = self.generate_button();
       await self.channel.edit(name=f"{self.user.name}-end"); # channel edit rate limit is 2 per 10 minutes
-      await self.channel.send(f'{self.user.mention}', embed=embed, view=view);
+      end_message = await self.channel.send(f'{self.user.mention}', embed=embed, view=view);
+      return CountdownDatabase().update_countdown_message(end_message.id, self.countdown_uuid);
     
   # Updates timer pointers for next day
   # Important to keep the timer flowing
@@ -97,7 +107,7 @@ class Timer():
 
       return await asyncio.sleep(difference);
 
-    await start_countdown()
+    return await start_countdown()
 
   # Generates embed for the end countdown message
   def generate_end_countdown_embed(self):

@@ -105,7 +105,7 @@ class Countdown(commands.Cog):
     countdown_channel = self.bot.get_channel(countdown["channel_id"]);
     user = await self.bot.fetch_user(countdown["user_id"]);
 
-    return await Timer(countdown_channel, user, countdown, type="minute").start();
+    return await Timer(countdown_channel, user, countdown).start();
 
   # Register slash command and main handler for initialisation
   @slash_command(guild_ids=config["guildIDs"], description="Starts a countdown from a set number of days")
