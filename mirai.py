@@ -1,3 +1,4 @@
+import asyncio
 import discord;
 import json
 import datetime;
@@ -18,22 +19,25 @@ with open("config/mirai.json") as file:
 async def on_ready():
   dev_channel = mirai.get_channel(929427727033982986);
   await dev_channel.send("I'm booting up! (◕ᴗ◕✿)");
+  await run_existing_countdowns();
+
+async def run_existing_countdowns():
   countdowns = CountdownDatabase().get_all_countdowns();
+  countdown_tasks = [];
   for countdown in countdowns:
     countdown_channel = mirai.get_channel(countdown["channel_id"]);
     if datetime.datetime.now() < Helpers().format_to_datetime(countdown["ends_at"]):
       countdown_message = countdown_channel.get_partial_message(countdown["message_id"]);
       user = await mirai.fetch_user(countdown["user_id"]);
-      await countdown_message.delete();
-      await Timer(countdown_channel, user, countdown, type="minute").start();
+      countdown_message and await countdown_message.delete();
+      countdown_tasks.append(asyncio.create_task(Timer(countdown_channel, user, countdown, type="minute").start()));
     else:
       await countdown_channel.category.delete();
       await countdown_channel.delete();
       CountdownDatabase().delete_countdown(uuid=countdown["uuid"]);
-      
 
-  # TODO: Start existing countdowns
-  # TODO: Delete countdowns that already have ended
+  for task in countdown_tasks:
+    await task;
 
 # Loads cogs into mirai
 # TODO: Make it a loop of the whole cogs folder
