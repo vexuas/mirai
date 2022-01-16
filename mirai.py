@@ -13,6 +13,8 @@ with open("config/mirai.json") as file:
 async def on_ready():
   dev_channel = mirai.get_channel(929427727033982986);
   await dev_channel.send("I'm booting up! (◕ᴗ◕✿)");
+  # TODO: Start existing countdowns
+  # TODO: Delete countdowns that already have ended
 
 # Loads cogs into mirai
 # TODO: Make it a loop of the whole cogs folder

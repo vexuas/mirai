@@ -1,6 +1,6 @@
 import discord;
 import json;
-import asyncio;
+
 from discord.commands import slash_command, Option;
 from discord.ext import commands;
 from discord.ui import Button, View;
