@@ -53,12 +53,13 @@ class Timer():
       # Deletes existing countdown message
       # This is so we can properly ping the user in a new message when the day timer gets called again
       countdown = CountdownDatabase().get_countdown(uuid=self.countdown_uuid);
-      message = self.channel.get_partial_message(countdown["message_id"]);
-      await message.delete();
+      if countdown:
+        message = self.channel.get_partial_message(countdown["message_id"]);
+        await message.delete();
 
-      await asyncio.sleep(3); # Buffer time; perhaps there's a better way of going about this
-      self.update_next_timer(); # Updates timer pointers for the next day
-      return await self.start(); # Calls itself
+        await asyncio.sleep(3); # Buffer time; perhaps there's a better way of going about this
+        self.update_next_timer(); # Updates timer pointers for the next day
+        return await self.start(); # Calls itself
     else:
       # Send end of countdown message
       embed = self.generate_end_countdown_embed();
