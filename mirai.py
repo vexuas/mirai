@@ -21,6 +21,11 @@ async def on_ready():
   await dev_channel.send("I'm booting up! (◕ᴗ◕✿)");
   await run_existing_countdowns();
 
+# Function to execute existing countdowns
+# For each countdown, we want to check if the countdown has already ended or it's still ongoing
+# If ended, we delete it from our database along with the channels associated to it
+# If not, we create an asyncio task for each countdown
+# Finally we iterate though the asyncio tasks, calling them asynchronously but concurrently
 async def run_existing_countdowns():
   countdowns = CountdownDatabase().get_all_countdowns();
   countdown_tasks = [];

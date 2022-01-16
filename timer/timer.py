@@ -53,6 +53,14 @@ class Timer():
       # Deletes existing countdown message
       # This is so we can properly ping the user in a new message when the day timer gets called again
       countdown = CountdownDatabase().get_countdown(uuid=self.countdown_uuid);
+
+      # Wrapping the next timer calls in a countdown existence conditional
+      # I'll admit this is a ghetto alternative
+      # The proper way is to clear the existing asyncio tasks when we stop a countdown
+      # However, I'm not too versed with the module yet
+      # As the timer task isn't cleared, it will continue and finish leading to the methods below
+      # It will run into an error when trying to get the message as countdown doesn't exist anymore
+      # Hence to prevent that, this condition is made. Told you it was ghetto, maybe I'll refactor in the future
       if countdown:
         message = self.channel.get_partial_message(countdown["message_id"]);
         await message.delete();
