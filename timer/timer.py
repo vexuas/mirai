@@ -72,7 +72,7 @@ class Timer():
       # Send end of countdown message
       embed = self.generate_end_countdown_embed();
       view = self.generate_button();
-      # await self.channel.edit(name=f"{self.user.name}-end"); # channel edit rate limit is 2 per 10 minutes
+      await self.channel.edit(name=f"{self.user.name}-end"); # channel edit rate limit is 2 per 10 minutes
       end_message = await self.channel.send(f'{self.user.mention}', embed=embed, view=view);
       return CountdownDatabase().update_countdown_message(end_message.id, self.countdown_uuid);
     
@@ -100,7 +100,7 @@ class Timer():
   async def start_day_timer(self, user, channel, difference, current):  
     async def start_countdown():
       countdown_content = f"{user.mention} Day {current}! Good luck :D" if current == self.days else f"{user.mention} Day {current}"
-      # current != self.days and await self.channel.edit(name=f"{self.user.name}-day-{current}"); # channel edit rate limit is 2 per 10 minutes
+      current != self.days and await self.channel.edit(name=f"{self.user.name}-day-{current}"); # channel edit rate limit is 2 per 10 minutes
       countdown_message = await channel.send(countdown_content);
 
       CountdownDatabase().update_countdown_message(countdown_message.id, self.countdown_uuid);
