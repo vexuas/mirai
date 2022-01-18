@@ -34,9 +34,14 @@ class About(commands.Cog):
   # Register slash command and main handler for initialisation
   @slash_command(description="Displays information about Mirai")
   async def about(self, ctx):
-    embed = self.generate_about_embed();
-    return await ctx.respond(embed=embed);
-  
+    try:
+      embed = self.generate_about_embed();
+      return await ctx.respond(embed=embed);
+    except Exception as error:
+      error_embed = Helpers().generate_error_embed("Oops something went wrong! D: Try again in a bit!");
+      await ctx.respond(embed=error_embed);
+      return await Helpers().send_error_log(self.bot, ctx, error, "About Command");
+
 
 def setup(bot: commands.Bot):
   bot.add_cog(About(bot));

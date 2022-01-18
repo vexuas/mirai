@@ -20,7 +20,8 @@ class Timer():
   # user: discord User - for pinging purposes
   # countdown: countdown instance from our database
   # type: if timer should use days or minutes; latter more on testing but could be an additional feature in the future
-  def __init__(self, channel, user, countdown, type="day"):
+  def __init__(self, bot, channel, user, countdown, type="day"):
+    self.bot = bot;
     self.date_now = datetime.datetime.now();
     self.started_at = Helpers().format_to_datetime(countdown["started_at"]);
     self.ends_at = Helpers().format_to_datetime(countdown["ends_at"]);
@@ -130,6 +131,11 @@ class Timer():
   # Deletes countdown instance from our database
   # Then deletes the countdown category and channel
   async def handle_on_close(self, interaction):
-    CountdownDatabase().delete_countdown(self.countdown_uuid);
-    await interaction.channel.category.delete();
-    return await interaction.channel.delete();
+    try:
+      CountdownDatabase().delete_countdown(self.countdown_uuid);
+      await interaction.channel.category.delete();
+      return await interaction.channel.delete();
+    except Exception as error:
+      error_embed = Helpers().generate_error_embed("Oops something went wrong! D:\n\n I've notified the owner about the problem, feel free to delete this channel!");
+      await interaction.response.edit_message(embed=error_embed, view=None);
+      return await Helpers().send_error_log(self.bot, interaction, error, "End Close Countdown");

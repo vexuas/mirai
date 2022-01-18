@@ -35,7 +35,7 @@ async def run_existing_countdowns():
       countdown_message = countdown_channel.get_partial_message(countdown["message_id"]);
       user = await mirai.fetch_user(countdown["user_id"]);
       countdown_message and await countdown_message.delete();
-      countdown_tasks.append(asyncio.create_task(Timer(countdown_channel, user, countdown).start()));
+      countdown_tasks.append(asyncio.create_task(Timer(mirai, countdown_channel, user, countdown).start()));
     else:
       await countdown_channel.category.delete();
       await countdown_channel.delete();

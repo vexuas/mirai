@@ -55,11 +55,16 @@ class Countdown(commands.Cog):
   # Handler when a user clicks the Cancel Button
   # Edits the original message with a new embed and clears buttons
   async def handle_on_cancel(self, interaction):
-    embed = discord.Embed();
-    embed.color = discord.Colour(16711680);
-    embed.description = "Cancelled Countdown";
+    try:
+      embed = discord.Embed();
+      embed.color = discord.Colour(16711680);
+      embed.description = "Cancelled Countdown";
 
-    return await interaction.response.edit_message(embed=embed, view=None);
+      return await interaction.response.edit_message(embed=embed, view=None);
+    except Exception as error:
+      error_embed = Helpers().generate_error_embed("Oops something went wrong! D: Try again in a bit!");
+      await interaction.response.edit_message(embed=error_embed, view=None);
+      return await Helpers().send_error_log(self.bot, interaction, error, "Cancel Countdown");
 
   # Handler when a user clicks the Let's go Button
   # 4 parts:
@@ -70,29 +75,34 @@ class Countdown(commands.Cog):
   # I initially wanted to move the user to the text channel but seems discord doesn't support that; only voice channel movement. 
   # I guess it's hard to keep track and merits probably doesn't outweight the implementation
   async def handle_on_confirm(self, interaction):
-    # Creates a new channel under a new category
-    current_guild = await self.bot.fetch_guild(interaction.guild_id);
-    countdown_category = await current_guild.create_category('Mirai Countdown');
-    countdown_channel = await countdown_category.create_text_channel(f'{interaction.user.name}-day-{self.days}');
+    try:
+      # Creates a new channel under a new category
+      current_guild = await self.bot.fetch_guild(interaction.guild_id);
+      countdown_category = await current_guild.create_category('Mirai Countdown');
+      countdown_channel = await countdown_category.create_text_channel(f'{interaction.user.name}-day-{self.days}');
 
-    # Creates a countdown instance in our database
-    # More information in countdown_db
-    CountdownDatabase({
-      "user": interaction.user,
-      "guild": current_guild,
-      "category_channel": countdown_category,
-      "channel": countdown_channel,
-      "days": self.days      
-    }).create_countdown();
+      # Creates a countdown instance in our database
+      # More information in countdown_db
+      CountdownDatabase({
+        "user": interaction.user,
+        "guild": current_guild,
+        "category_channel": countdown_category,
+        "channel": countdown_channel,
+        "days": self.days      
+      }).create_countdown();
 
-    # Edits original interaction message with link to new channel
-    embed = discord.Embed();
-    embed.color = discord.Colour(3066993);
-    embed.description = f"Countdown successfully set in {countdown_channel.mention}!";
-    await interaction.response.edit_message(embed=embed, view=None);
+      # Edits original interaction message with link to new channel
+      embed = discord.Embed();
+      embed.color = discord.Colour(3066993);
+      embed.description = f"Countdown successfully set in {countdown_channel.mention}!";
+      await interaction.response.edit_message(embed=embed, view=None);
 
-    # Calls the start_countdown function to start timer
-    return await self.start_countdown(interaction.user.id, interaction.guild.id);
+      # Calls the start_countdown function to start timer
+      return await self.start_countdown(interaction.user.id, interaction.guild.id);
+    except Exception as error:
+      error_embed = Helpers().generate_error_embed("Oops something went wrong! D: Try again in a bit!");
+      await interaction.response.edit_message(embed=error_embed, view=None);
+      return await Helpers().send_error_log(self.bot, interaction, error, "Confirm Countdown");
 
   # Starts countdown timer
   # Retrieves countdown instance from our database 
@@ -105,58 +115,62 @@ class Countdown(commands.Cog):
     countdown_channel = self.bot.get_channel(countdown["channel_id"]);
     user = await self.bot.fetch_user(countdown["user_id"]);
 
-    return await Timer(countdown_channel, user, countdown).start();
+    return await Timer(self.bot, countdown_channel, user, countdown).start();
 
   # Register slash command and main handler for initialisation
   @slash_command(description="Starts a countdown from a set number of days")
   async def countdown(self, ctx, days: Option(int, "Enter number of days!", required=False), stop: Option(discord.TextChannel, "Stops an existing countdown", required=False)):
-    # If no options are passed, we show the command information
-    if not days and not stop:
-      embed = self.generate_countdown_information_embed();
-      return await ctx.respond(embed=embed);
-
-    # Checks if the user has an existing countdown within the guild  
-    user_countdown = CountdownDatabase().get_countdown(ctx.user.id, ctx.guild.id);
-
-    # Stop option handler
-    # If user has a countdown in the guild and selects the countdown channel
-    # - We delete the category channel and the countdown channel
-    # - We then delete the countdown instance in our database
-    # - Finally we end an appropriate embed message
-    # If user doesn't have a countdown nor selected an existing countdown channel
-    # - Send a warning message that there's no countdown linked to the user
-    if stop:
-      embed = discord.Embed();
-      if user_countdown and stop.id == user_countdown["channel_id"]:
-        countdown_channel = self.bot.get_channel(user_countdown["channel_id"]);
-        CountdownDatabase().delete_countdown(user_countdown["uuid"]);
-        await countdown_channel.category.delete();
-        await countdown_channel.delete();
-        embed.color = discord.Colour(16711680);
-        embed.description = f"Stopped Countdown";
+    try:
+      # If no options are passed, we show the command information
+      if not days and not stop:
+        embed = self.generate_countdown_information_embed();
         return await ctx.respond(embed=embed);
 
-      embed.color = discord.Colour(16776960);
-      embed.description = "Selected channel doesn't have a countdown linked to user";
-      return await ctx.respond(embed=embed);
+      # Checks if the user has an existing countdown within the guild  
+      user_countdown = CountdownDatabase().get_countdown(ctx.user.id, ctx.guild.id);
 
-    # Days option handler
-    # If the user has an existing countdown
-    # - We send a warning with a link to the existing countdown channel
-    # Else we send the countdown confirmation message
-    if user_countdown:
-      countdown_channel = self.bot.get_channel(user_countdown["channel_id"]);
-      embed = discord.Embed();
-      embed.color = discord.Colour(16776960);
-      embed.description = f'You already have a countdown set in {countdown_channel.mention}';
+      # Stop option handler
+      # If user has a countdown in the guild and selects the countdown channel
+      # - We delete the category channel and the countdown channel
+      # - We then delete the countdown instance in our database
+      # - Finally we end an appropriate embed message
+      # If user doesn't have a countdown nor selected an existing countdown channel
+      # - Send a warning message that there's no countdown linked to the user
+      if stop:
+        embed = discord.Embed();
+        if user_countdown and stop.id == user_countdown["channel_id"]:
+          countdown_channel = self.bot.get_channel(user_countdown["channel_id"]);
+          CountdownDatabase().delete_countdown(user_countdown["uuid"]);
+          await countdown_channel.category.delete();
+          await countdown_channel.delete();
+          embed.color = discord.Colour(16711680);
+          embed.description = f"Stopped Countdown";
+          return await ctx.respond(embed=embed);
+        embed.color = discord.Colour(16776960);
+        embed.description = "Selected channel doesn't have a countdown linked to user";
+        return await ctx.respond(embed=embed);
       
-      return await ctx.respond(embed=embed);
-      
-    self.days = days;
-    actions_view = self.generate_buttons();
-    embed = self.generate_countdown_confirmation_embed(days);
+      # Days option handler
+      # If the user has an existing countdown
+      # - We send a warning with a link to the existing countdown channel
+      # Else we send the countdown confirmation message
+      if user_countdown:
+        countdown_channel = self.bot.get_channel(user_countdown["channel_id"]);
+        embed = discord.Embed();
+        embed.color = discord.Colour(16776960);
+        embed.description = f'You already have a countdown set in {countdown_channel.mention}';
+        
+        return await ctx.respond(embed=embed);
+  
+      self.days = days;
+      actions_view = self.generate_buttons();
+      embed = self.generate_countdown_confirmation_embed(days);
 
-    return await ctx.respond(embed=embed, view=actions_view);
+      return await ctx.respond(embed=embed, view=actions_view);
+    except Exception as error:
+      error_embed = Helpers().generate_error_embed("Oops something went wrong! D: Try again in a bit!");
+      await ctx.respond(embed=error_embed);
+      return await Helpers().send_error_log(self.bot, ctx, error, "Countdown Command");
 
 
 def setup(bot: commands.Bot):
