@@ -1,3 +1,27 @@
+# v1.1.0 (Wed Jan 19 2022)
+
+### Release Notes
+
+#### Add error handling and logging ([#16](https://github.com/vexuas/mirai/pull/16))
+
+Add error handing and logging
+
+---
+
+#### 🚀 Enhancement
+
+- Add error handling and logging [#16](https://github.com/vexuas/mirai/pull/16) ([@vexuas](https://github.com/vexuas))
+
+#### 🏠 Internal
+
+- Release/2022 01 17 [#15](https://github.com/vexuas/mirai/pull/15) ([@vexuas](https://github.com/vexuas))
+
+#### Authors: 1
+
+- Gabriel R ([@vexuas](https://github.com/vexuas))
+
+---
+
 # v1.0.0 (Mon Jan 17 2022)
 
 ### Release Notes
