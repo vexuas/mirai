@@ -131,6 +131,11 @@ class Timer():
   # Deletes countdown instance from our database
   # Then deletes the countdown category and channel
   async def handle_on_close(self, interaction):
-    CountdownDatabase().delete_countdown(self.countdown_uuid);
-    await interaction.channel.category.delete();
-    return await interaction.channel.delete();
+    try:
+      CountdownDatabase().delete_countdown(self.countdown_uuid);
+      await interaction.channel.category.delete();
+      return await interaction.channel.delete();
+    except Exception as e:
+      error_embed = Helpers().generate_error_embed("Oops something went wrong! D:\n\n I've notified the owner about the problem, feel free to delete this channel!");
+      await interaction.response.edit_message(embed=error_embed, view=None);
+      return await Helpers().send_error_log(self.bot, e);
