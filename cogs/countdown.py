@@ -70,29 +70,34 @@ class Countdown(commands.Cog):
   # I initially wanted to move the user to the text channel but seems discord doesn't support that; only voice channel movement. 
   # I guess it's hard to keep track and merits probably doesn't outweight the implementation
   async def handle_on_confirm(self, interaction):
-    # Creates a new channel under a new category
-    current_guild = await self.bot.fetch_guild(interaction.guild_id);
-    countdown_category = await current_guild.create_category('Mirai Countdown');
-    countdown_channel = await countdown_category.create_text_channel(f'{interaction.user.name}-day-{self.days}');
+    try:
+      # Creates a new channel under a new category
+      current_guild = await self.bot.fetch_guild(interaction.guild_id);
+      countdown_category = await current_guild.create_category('Mirai Countdown');
+      countdown_channel = await countdown_category.create_text_channel(f'{interaction.user.name}-day-{self.days}');
 
-    # Creates a countdown instance in our database
-    # More information in countdown_db
-    CountdownDatabase({
-      "user": interaction.user,
-      "guild": current_guild,
-      "category_channel": countdown_category,
-      "channel": countdown_channel,
-      "days": self.days      
-    }).create_countdown();
+      # Creates a countdown instance in our database
+      # More information in countdown_db
+      CountdownDatabase({
+        "user": interaction.user,
+        "guild": current_guild,
+        "category_channel": countdown_category,
+        "channel": countdown_channel,
+        "days": self.days      
+      }).create_countdown();
 
-    # Edits original interaction message with link to new channel
-    embed = discord.Embed();
-    embed.color = discord.Colour(3066993);
-    embed.description = f"Countdown successfully set in {countdown_channel.mention}!";
-    await interaction.response.edit_message(embed=embed, view=None);
+      # Edits original interaction message with link to new channel
+      embed = discord.Embed();
+      embed.color = discord.Colour(3066993);
+      embed.description = f"Countdown successfully set in {countdown_channel.mention}!";
+      await interaction.response.edit_message(embed=embed, view=None);
 
-    # Calls the start_countdown function to start timer
-    return await self.start_countdown(interaction.user.id, interaction.guild.id);
+      # Calls the start_countdown function to start timer
+      return await self.start_countdown(interaction.user.id, interaction.guild.id);
+    except Exception as e:
+      error_embed = Helpers().generate_error_embed("Oops something went wrong! D: Try again in a bit!");
+      await interaction.response.edit_message(embed=error_embed, view=None);
+      return await Helpers().send_error_log(self.bot, e);
 
   # Starts countdown timer
   # Retrieves countdown instance from our database 
@@ -158,7 +163,8 @@ class Countdown(commands.Cog):
 
       return await ctx.respond(embed=embed, view=actions_view);
     except Exception as e:
-      await ctx.respond('Oops something went wrong! D: Try again in a bit!')
+      error_embed = Helpers().generate_error_embed("Oops something went wrong! D: Try again in a bit!");
+      await ctx.respond(embed=error_embed);
       return await Helpers().send_error_log(self.bot, e);
 
 

@@ -38,8 +38,9 @@ class About(commands.Cog):
       embed = self.generate_about_embed();
       return await ctx.respond(embed=embed);
     except Exception as e:
-        await ctx.respond('Oops something went wrong! D: Try again in a bit!')
-        return await Helpers().send_error_log(self.bot, e);
+      error_embed = Helpers().generate_error_embed("Oops something went wrong! D: Try again in a bit!");
+      await ctx.respond(embed=error_embed);
+      return await Helpers().send_error_log(self.bot, e);
 
 
 def setup(bot: commands.Bot):

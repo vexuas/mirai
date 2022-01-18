@@ -24,3 +24,10 @@ class Helpers():
   async def send_error_log(self, bot, error):
     dev_channel = bot.get_channel(933016043310440519);
     return await dev_channel.send(str(error));
+
+  def generate_error_embed(self, message):
+    embed = discord.Embed();
+    embed.color = discord.Colour(16711680);
+    embed.description = message;
+    
+    return embed;
