@@ -61,10 +61,10 @@ class Countdown(commands.Cog):
       embed.description = "Cancelled Countdown";
 
       return await interaction.response.edit_message(embed=embed, view=None);
-    except Exception as e:
+    except Exception as error:
       error_embed = Helpers().generate_error_embed("Oops something went wrong! D: Try again in a bit!");
       await interaction.response.edit_message(embed=error_embed, view=None);
-      return await Helpers().send_error_log(self.bot, e);
+      return await Helpers().send_error_log(self.bot, interaction, error, "Cancel Countdown");
 
   # Handler when a user clicks the Let's go Button
   # 4 parts:
@@ -99,10 +99,10 @@ class Countdown(commands.Cog):
 
       # Calls the start_countdown function to start timer
       return await self.start_countdown(interaction.user.id, interaction.guild.id);
-    except Exception as e:
+    except Exception as error:
       error_embed = Helpers().generate_error_embed("Oops something went wrong! D: Try again in a bit!");
       await interaction.response.edit_message(embed=error_embed, view=None);
-      return await Helpers().send_error_log(self.bot, e);
+      return await Helpers().send_error_log(self.bot, interaction, error, "Confirm Countdown");
 
   # Starts countdown timer
   # Retrieves countdown instance from our database 
@@ -115,7 +115,7 @@ class Countdown(commands.Cog):
     countdown_channel = self.bot.get_channel(countdown["channel_id"]);
     user = await self.bot.fetch_user(countdown["user_id"]);
 
-    return await Timer(self.bot, countdown_channel, user, countdown).start();
+    return await Timer(self.bot, countdown_channel, user, countdown, 'minute').start();
 
   # Register slash command and main handler for initialisation
   @slash_command(description="Starts a countdown from a set number of days")
@@ -167,10 +167,10 @@ class Countdown(commands.Cog):
       embed = self.generate_countdown_confirmation_embed(days);
 
       return await ctx.respond(embed=embed, view=actions_view);
-    except Exception as e:
+    except Exception as error:
       error_embed = Helpers().generate_error_embed("Oops something went wrong! D: Try again in a bit!");
       await ctx.respond(embed=error_embed);
-      return await Helpers().send_error_log(self.bot, e);
+      return await Helpers().send_error_log(self.bot, ctx, error, "Countdown Command");
 
 
 def setup(bot: commands.Bot):

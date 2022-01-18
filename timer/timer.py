@@ -135,7 +135,7 @@ class Timer():
       CountdownDatabase().delete_countdown(self.countdown_uuid);
       await interaction.channel.category.delete();
       return await interaction.channel.delete();
-    except Exception as e:
+    except Exception as error:
       error_embed = Helpers().generate_error_embed("Oops something went wrong! D:\n\n I've notified the owner about the problem, feel free to delete this channel!");
       await interaction.response.edit_message(embed=error_embed, view=None);
-      return await Helpers().send_error_log(self.bot, e);
+      return await Helpers().send_error_log(self.bot, interaction, error, "End Close Countdown");
