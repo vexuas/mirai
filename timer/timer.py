@@ -20,7 +20,8 @@ class Timer():
   # user: discord User - for pinging purposes
   # countdown: countdown instance from our database
   # type: if timer should use days or minutes; latter more on testing but could be an additional feature in the future
-  def __init__(self, channel, user, countdown, type="day"):
+  def __init__(self, bot, channel, user, countdown, type="day"):
+    self.bot = bot;
     self.date_now = datetime.datetime.now();
     self.started_at = Helpers().format_to_datetime(countdown["started_at"]);
     self.ends_at = Helpers().format_to_datetime(countdown["ends_at"]);

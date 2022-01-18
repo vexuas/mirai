@@ -55,11 +55,16 @@ class Countdown(commands.Cog):
   # Handler when a user clicks the Cancel Button
   # Edits the original message with a new embed and clears buttons
   async def handle_on_cancel(self, interaction):
-    embed = discord.Embed();
-    embed.color = discord.Colour(16711680);
-    embed.description = "Cancelled Countdown";
+    try:
+      embed = discord.Embed();
+      embed.color = discord.Colour(16711680);
+      embed.description = "Cancelled Countdown";
 
-    return await interaction.response.edit_message(embed=embed, view=None);
+      return await interaction.response.edit_message(embed=embed, view=None);
+    except Exception as e:
+      error_embed = Helpers().generate_error_embed("Oops something went wrong! D: Try again in a bit!");
+      await interaction.response.edit_message(embed=error_embed, view=None);
+      return await Helpers().send_error_log(self.bot, e);
 
   # Handler when a user clicks the Let's go Button
   # 4 parts:
@@ -110,7 +115,7 @@ class Countdown(commands.Cog):
     countdown_channel = self.bot.get_channel(countdown["channel_id"]);
     user = await self.bot.fetch_user(countdown["user_id"]);
 
-    return await Timer(countdown_channel, user, countdown).start();
+    return await Timer(self.bot, countdown_channel, user, countdown).start();
 
   # Register slash command and main handler for initialisation
   @slash_command(description="Starts a countdown from a set number of days")
