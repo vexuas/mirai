@@ -20,3 +20,7 @@ class Helpers():
 
   def format_to_datetime(self, date_string):
     return datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S.%f');
+
+  async def send_error_log(self, bot, error):
+    dev_channel = bot.get_channel(933016043310440519);
+    return await dev_channel.send(str(error));
