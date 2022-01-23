@@ -121,7 +121,7 @@ class Timer():
   # Generates close button for end countdown message
   def generate_button(self):
     close_button = Button(label="Close", style=discord.ButtonStyle.secondary);
-    view = View();
+    view = View(timeout=None); # Default is 3 minutes; setting to none as we want users to close the channel whenever they want
     view.add_item(close_button);
     close_button.callback = self.handle_on_close;
     

@@ -46,7 +46,7 @@ class Countdown(commands.Cog):
     view = View();
     view.add_item(cancel_button);
     view.add_item(confirm_button);
-
+    
     confirm_button.callback = self.handle_on_confirm;
     cancel_button.callback = self.handle_on_cancel;
     
