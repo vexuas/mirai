@@ -1,3 +1,27 @@
+# v1.1.1 (Mon Jan 24 2022)
+
+### Release Notes
+
+#### Add no timeout to countdown end message ([#18](https://github.com/vexuas/mirai/pull/18))
+
+Add no timeout to countdown end button
+
+---
+
+#### 🐛 Bug Fix
+
+- Add no timeout to countdown end message [#18](https://github.com/vexuas/mirai/pull/18) ([@vexuas](https://github.com/vexuas))
+
+#### 🏠 Internal
+
+- Release/2022 01 19 [#17](https://github.com/vexuas/mirai/pull/17) ([@vexuas](https://github.com/vexuas))
+
+#### Authors: 1
+
+- Gabriel R ([@vexuas](https://github.com/vexuas))
+
+---
+
 # v1.1.0 (Wed Jan 19 2022)
 
 ### Release Notes
